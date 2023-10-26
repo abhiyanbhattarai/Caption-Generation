@@ -1,0 +1,65 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+</br>
+<h1 align="center">Social Media Caption Generator</h1>
+</br>
+<div class="container mt-5">
+    <h3>Select an image to upload</h3>
+    <form method="POST" enctype="multipart/form-data">
+    </br>
+        <div class="form-group">
+            <label for="file"><strong>Choose an image to upload:</strong></label>
+            <i class="fa fa-picture-o" aria-hidden="true"></i>
+            </br>
+            <input type="file" class="form-control" name="file" id="file" accept=".jpg, .jpeg, .png, .gif">
+        </div>
+        <button type="submit" class="btn btn-primary">Generate Caption</button>
+    </form>
+</div>
+</br>
+<div id="image-section" style="display: none;"> <!-- Initially hide this section -->
+    {% if filename %}
+        <h2>Uploaded Image:</h2>
+        </br>
+        <img src="{{ url_for('views.display_image', filename=filename) }}" alt="Uploaded Image" width="500" height="400">
+        </br>
+    </br>
+        <p id="editable-text" class="outlined-text">{{ generated_caption }}</p>
+        <div class = "row">    
+            <button id="edit-button" class="btn btn-info"> <i class="fa fa-pencil" aria-hidden="true"></i> <b>Edit Text</b></button >
+            <p id="edited-text"></p>
+            <button id="post-edited-button" class="btn btn-info ml-2"><b>Post</b></button>
+        </div>
+    {% endif %} <!-- End of if statement -->
+</div>
+
+<script>
+    // JavaScript code for edit text functionality
+    const editableText = document.getElementById('editable-text');
+    const editButton = document.getElementById('edit-button');
+    const editedText = document.getElementById('edited-text');
+
+    editButton.addEventListener('click', () => {
+        editableText.contentEditable = true;
+        editableText.focus();
+        editButton.style.display = 'none';
+        editedText.style.display = 'none';
+    });
+
+    editableText.addEventListener('input', () => {
+        editButton.style.display = 'block';
+        editedText.style.display = 'block';
+        editedText.textContent = editableText.textContent;
+    });
+</script>
+<script>
+    // JavaScript code for showing the image section when an image is uploaded
+    const imageSection = document.getElementById('image-section');
+
+    // Check if filename is not empty (image is uploaded)
+    {% if filename %}
+        imageSection.style.display = 'block'; // Show the image section
+    {% endif %}
+</script>
+</br>
+{% endblock %}
