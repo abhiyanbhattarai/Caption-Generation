@@ -17,4 +17,4 @@
 ## ScreenShots
 
 ### Home Page
-![image.png](website\static\Home Page.PNG)
+![Home Page](Homepage.PNG)
