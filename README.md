@@ -7,8 +7,8 @@ Generate Caption From Image
     `pip install -r Requirements.txt`
 2. Download Spacy Data Model.
 
-  `python -m spacy download en`
-  
+      `python -m spacy download en`
+
 3. Run the app.
 
-  `python main.py`
+      `python main.py`
