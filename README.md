@@ -13,3 +13,8 @@
 3. Run the app.
 
       `python main.py`
+
+## ScreenShots
+
+### Home Page
+![image.png](Home Page.PNG)
