@@ -1,5 +1,6 @@
 # Caption-Generation
-Generate Caption From Image
+- This project is a web application that allows users to upload images and generate captions for those images. 
+- It utilizes a pre-trained deep learning model for image captioning and a Flask-based user interface to make it accessible through a web browser.
 
 ## How To Run?
 1. Install Requirements.txt
