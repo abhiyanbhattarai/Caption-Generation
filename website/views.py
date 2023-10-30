@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request,send_from_directory, flash, redirect, url_for
+from flask import Blueprint, render_template, request, send_from_directory, flash, redirect, url_for, session
 from werkzeug.utils import secure_filename
 import os
 from . import db
@@ -6,14 +6,28 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 from prediction import generate_caption, model1, EncoderDecoder
+from datetime import datetime, timedelta
 
 views = Blueprint('views', __name__)
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 UPLOAD_FOLDER = 'website/static/uploads/'
 
-@views.route('/', methods=['GET', 'POST'])
+
+def check_session_timeout():
+    last_activity = session.get('last_activity')
+    if last_activity is not None and datetime.now() - last_activity > timedelta(seconds=views.config['PERMANENT_SESSION_LIFETIME']):
+        flash('Session timed out. Please log in again.', category='error')
+        return redirect(url_for('views.login'))
+
+
+@views.route('/')
+def login():
+    return render_template('login.html')
+
+@views.route('/home', methods=['GET', 'POST'])
 def home():
+    check_session_timeout()  # Apply session timeout check before processing the /home route
     if request.method == 'POST':
         file = request.files['file']
         if file and allowed_file(file.filename):

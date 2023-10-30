@@ -3,6 +3,7 @@ from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db   ##means from __init__.py import db
 from flask_login import login_user, login_required, logout_user, current_user
+from datetime import datetime, timedelta  # Import the datetime module for session timeout
 
 
 auth = Blueprint('auth', __name__)
@@ -21,6 +22,7 @@ def login():
                 welcome_message = f'Welcome {user.first_name} !'
                 flash(welcome_message, category='success')
                 login_user(user, remember=True)
+                session['last_activity'] = datetime.now()
                 return redirect(url_for('views.home'))
             else:
                 flash('Incorrect password, try again.', category='error')
