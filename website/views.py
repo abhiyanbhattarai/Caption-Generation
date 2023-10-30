@@ -6,7 +6,7 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 from prediction import generate_caption, model1, EncoderDecoder
-from datetime import datetime, timedelta, timezone
+# from datetime import datetime, timedelta, timezone
 from instagram_posting import post_to_instagram
 
 views = Blueprint('views', __name__)
