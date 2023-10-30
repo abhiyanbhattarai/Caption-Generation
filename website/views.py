@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, send_from_directory, flash, redirect, url_for, session
+from flask import Blueprint, render_template, request, send_from_directory, flash, redirect, url_for, session, current_app
 from werkzeug.utils import secure_filename
 import os
 from . import db
@@ -6,7 +6,8 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 from prediction import generate_caption, model1, EncoderDecoder
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from instagram_posting import post_to_instagram
 
 views = Blueprint('views', __name__)
 
@@ -14,11 +15,13 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 UPLOAD_FOLDER = 'website/static/uploads/'
 
 
-def check_session_timeout():
-    last_activity = session.get('last_activity')
-    if last_activity is not None and datetime.now() - last_activity > timedelta(seconds=views.config['PERMANENT_SESSION_LIFETIME']):
-        flash('Session timed out. Please log in again.', category='error')
-        return redirect(url_for('views.login'))
+# def check_session_timeout():
+#     last_activity = session.get('last_activity')
+#     now = datetime.now(timezone.utc)
+#     session_timeout = timedelta(seconds=600)  # Set the session timeout to 10 minutes (adjust as needed)
+#     if last_activity is not None and now - last_activity > session_timeout:
+#         flash('Session timed out. Please log in again.', category='error')
+#         return redirect(url_for('auth.login'))
 
 
 @views.route('/')
@@ -27,7 +30,7 @@ def login():
 
 @views.route('/home', methods=['GET', 'POST'])
 def home():
-    check_session_timeout()  # Apply session timeout check before processing the /home route
+    # check_session_timeout()  # Apply session timeout check before processing the /home route
     if request.method == 'POST':
         file = request.files['file']
         if file and allowed_file(file.filename):
@@ -54,3 +57,16 @@ def allowed_file(filename):
 @views.route('/uploads/<filename>')
 def display_image(filename):
     return send_from_directory('static/uploads', filename)
+
+@views.route('/post_to_instagram_action', methods=['POST'])
+def post_to_instagram_action():
+    # This route handles the actual Instagram post action
+    caption = request.form.get('caption')  # Get the caption from the form
+    filename = request.form.get('filename')  # Get the filename from the form
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+
+    # Post the image to Instagram using the post_to_instagram function
+    post_to_instagram(caption, file_path)
+
+    flash('Image posted to Instagram successfully!', category='success')
+    return redirect(url_for('views.home'))

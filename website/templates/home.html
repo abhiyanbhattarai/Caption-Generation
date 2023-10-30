@@ -27,7 +27,11 @@
         <p id="editable-text" class="outlined-text">{{ generated_caption }}</p>
             <button id="edit-button" class="btn btn-info"> <i class="fa fa-pencil" aria-hidden="true"></i> <b>Edit Text</b></button >
             <p id="edited-text"></p>
-            <button id="post-edited-button" class="btn btn-info"><b>Post</b></button>
+            <form action="{{ url_for('views.post_to_instagram_action') }}" method="post">
+                <input type="hidden" name="caption" value="{{ generated_caption }}">
+                <input type="hidden" name="filename" value="{{ filename }}">
+                <button type="submit" class="btn btn-info"><b>Post</b></button>
+            </form>
     {% endif %} <!-- End of if statement -->
 </div>
 
