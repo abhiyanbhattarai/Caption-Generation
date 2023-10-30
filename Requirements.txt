@@ -8,3 +8,4 @@ Werkzeug==2.3.0
 torchvision==0.15.2
 pandas
 tensorflow
+instagrapi
