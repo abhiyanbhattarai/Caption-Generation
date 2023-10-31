@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, send_from_directory, flash, redirect, url_for, session, current_app
 from werkzeug.utils import secure_filename
 import os
+from flask_login import login_required
 from . import db
 import tensorflow as tf
 import numpy as np
@@ -24,11 +25,12 @@ UPLOAD_FOLDER = 'website/static/uploads/'
 #         return redirect(url_for('auth.login'))
 
 
-@views.route('/')
-def login():
-    return render_template('login.html')
+# @views.route('/')
+# def login():
+#     return render_template('login.html')
 
-@views.route('/home', methods=['GET', 'POST'])
+@views.route('/', methods=['GET', 'POST'])
+@login_required
 def home():
     # check_session_timeout()  # Apply session timeout check before processing the /home route
     if request.method == 'POST':
