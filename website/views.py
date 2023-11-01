@@ -12,7 +12,9 @@ from instagram_posting import post_to_instagram
 
 views = Blueprint('views', __name__)
 
+# Allowable image extensions 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+# Image Upload Folder
 UPLOAD_FOLDER = 'website/static/uploads/'
 
 
@@ -24,11 +26,7 @@ UPLOAD_FOLDER = 'website/static/uploads/'
 #         flash('Session timed out. Please log in again.', category='error')
 #         return redirect(url_for('auth.login'))
 
-
-# @views.route('/')
-# def login():
-#     return render_template('login.html')
-
+# This route handles the home page of the website
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
@@ -52,10 +50,11 @@ def home():
     generated_caption = None  # Initialize to None if no caption is generated
     return render_template('home.html', filename=filename, generated_caption=generated_caption)
 
+# This handles the image upload
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
+#  This route handles the image display
 @views.route('/uploads/<filename>')
 def display_image(filename):
     return send_from_directory('static/uploads', filename)
