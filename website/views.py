@@ -59,6 +59,7 @@ def allowed_file(filename):
 def display_image(filename):
     return send_from_directory('static/uploads', filename)
 
+# This route handles the Instagram post action
 @views.route('/post_to_instagram_action', methods=['POST'])
 def post_to_instagram_action():
     # This route handles the actual Instagram post action
