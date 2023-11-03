@@ -16,14 +16,17 @@ First, make sure to create and activate a virtual environment:
 ```
 1. Install Requirements.txt
 
-    `pip install -r Requirements.txt`
+    ```bash 
+    pip install -r Requirements.txt```
 2. Download Spacy Data Model.
 
-      `python -m spacy download en`
+      ```bash
+      python -m spacy download en```
 
 3. Run the app.
 
-      `python main.py`
+      ```bash
+      python main.py```
 
 ## License
 
