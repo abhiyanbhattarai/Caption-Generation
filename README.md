@@ -6,7 +6,6 @@
 ## How To Run?
 
 - First, make sure to create and activate a virtual environment:
-
 ```bash
 python -m venv venv_name  # Create a virtual environment
 
