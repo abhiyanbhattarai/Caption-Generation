@@ -1,5 +1,6 @@
 # Caption-Generation
-- This project is a web application that allows users to upload images and generate captions for those images. 
+- This project is a web based application that allows users to upload images and generate captions for those images. 
+- Users can edit the generated caption and post that image and caption to social media(IG).
 - It utilizes a pre-trained deep learning model for image captioning and a Flask-based user interface to make it accessible through a web browser.
 
 ## How To Run?
