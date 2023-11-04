@@ -7,29 +7,26 @@
 
 - First, make sure to create and activate a virtual environment:
 
-**Create a virtual environment**
-`python -m venv venv_name` 
-**Activate the virtual environment (for macOS/Linux)**
-`source venv_name/bin/activate `
-**Activate the virtual environment (for Windows)**
-`venv_name\Scripts\activate`
----
+```bash
+python -m venv venv_name  # Create a virtual environment
+
+source venv_name/bin/activate  # Activate the virtual environment (for macOS/Linux)
+      
+venv_name\Scripts\activate  # Activate the virtual environment (for Windows) 
+```
 1. Install Requirements.txt
 
     ```bash 
-    pip install -r Requirements.txt
-    ```
+    pip install -r Requirements.txt```
 2. Download Spacy Data Model.
 
       ```bash
-      python -m spacy download en
-      ```
+      python -m spacy download en```
 
 3. Run the app.
 
       ```bash
-      python main.py
-      ```
+      python main.py```
 
 ## License
 
