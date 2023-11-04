@@ -8,17 +8,11 @@
 - First, make sure to create and activate a virtual environment:
 
 **Create a virtual environment**
-  ```bash
-  python -m venv venv_name  
-```
+`python -m venv venv_name` 
 **Activate the virtual environment (for macOS/Linux)**
-```bash
-  source venv_name/bin/activate  
-```
+`source venv_name/bin/activate `
 **Activate the virtual environment (for Windows)**
-```bash 
-  venv_name\Scripts\activate  
-```
+`venv_name\Scripts\activate`
 ---
 1. Install Requirements.txt
 
