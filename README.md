@@ -19,7 +19,7 @@
 ```bash 
   venv_name\Scripts\activate  
 ```
-
+---
 1. Install Requirements.txt
 
     ```bash 
