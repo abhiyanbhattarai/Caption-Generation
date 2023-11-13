@@ -13,7 +13,24 @@
             </br>
             <input type="file" class="form-control" name="file" id="file" accept=".jpg, .jpeg, .png, .gif">
         </div>
-        <button type="submit" class="btn btn-primary">Generate Caption</button>
+        <!-- <button type="submit" class="btn btn-primary">Generate Caption</button> -->
+            <h3>Generate Caption</h3>
+            <form action="/generate_caption" method="post" class="mb-4">
+                <div class="mb-3">
+                    <label for="sentiment" class="form-label">Select Sentiment:</label>
+                    <select name="sentiment" id="sentiment" class="form-select">
+                        <option value="happy">Happy</option>
+                        <option value="sad">Sad</option>
+                        <option value="angry">Angry</option>    
+                        <option value="fearful">Funny</option>
+                        <option value="nostalgic">Nostalgic</option>
+                        <option value="travel">Travel</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-info">Generate Caption</button>
+            </form>
+        <div id="result"></div>
     </form>
 </div>
 </br>
@@ -24,11 +41,11 @@
         <img src="{{ url_for('views.display_image', filename=filename) }}" alt="Uploaded Image" width="500" height="400">
         </br>
     </br>
-        <p id="editable-text" class="outlined-text">{{ generated_caption }}</p>
+        <p id="editable-text" class="outlined-text">{{ better_caption }}</p>
             <button id="edit-button" class="btn btn-info"> <i class="fa fa-pencil" aria-hidden="true"></i> <b>Edit Text</b></button >
             <p id="edited-text"></p>
             <form action="{{ url_for('views.post_to_instagram_action') }}" method="post">
-                <input type="hidden" name="caption" value="{{ generated_caption }}">
+                <input type="hidden" name="caption" value="{{ better_caption }}">
                 <input type="hidden" name="filename" value="{{ filename }}">
                 <button type="submit" class="btn btn-info"><b>Post</b></button>
             </form>
@@ -62,6 +79,26 @@
     {% if filename %}
         imageSection.style.display = 'block'; // Show the image section
     {% endif %}
+</script>
+<script>
+    function generateCaption(promptType) {
+        var userMessage = document.getElementById('user_message').value;
+
+        fetch('/generate_caption', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                user_message: genrated_caption,
+                prompt_type: promptType,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('result').textContent = data.response;
+        });
+    }
 </script>
 </br>
 {% endblock %}

@@ -10,6 +10,8 @@ from torch.utils.data import DataLoader,Dataset
 import torchvision.transforms as T
 
 
+
+
 class EncoderCNN(nn.Module):
     def __init__(self):
         super(EncoderCNN, self).__init__()
@@ -178,11 +180,18 @@ class EncoderDecoder(nn.Module):
 import pickle
 from data_loader import DataLoader
 
-device= 'cpu'
+
 
 import torch
 from torchvision import transforms
 from PIL import Image
+
+
+
+if not torch.backends.mps.is_available():
+    print('MPS not available')
+
+device= torch.device('mps')
 
 # Define the path to the saved model state file
 model_state_path = 'cap_gen_50_epochs_model_state_full.pth'
@@ -222,7 +231,7 @@ def generate_caption(image_path,model):
         vocab = pickle.load(f)
         
     model = model1()
-
+    model.to(device)
     model.load_state_dict(checkpoint['state_dict'])
     model.eval()
     

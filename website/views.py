@@ -9,6 +9,7 @@ from PIL import Image
 from prediction import generate_caption, model1, EncoderDecoder
 # from datetime import datetime, timedelta, timezone
 from instagram_posting import post_to_instagram
+from gpt_integration import generate_gpt_caption  
 
 views = Blueprint('views', __name__)
 
@@ -26,6 +27,9 @@ UPLOAD_FOLDER = 'website/static/uploads/'
 #         flash('Session timed out. Please log in again.', category='error')
 #         return redirect(url_for('auth.login'))
 
+
+# prompt_type = "Instagram Caption with hashtags:"
+
 # This route handles the home page of the website
 @views.route('/', methods=['GET', 'POST'])
 @login_required
@@ -40,15 +44,24 @@ def home():
 
             # Generate the image caption
             generated_caption = generate_caption(file_path,model1())
+            
+            # Retrieve the prompt_type from the form data
+            # prompt_type = request.form.get('prompt_type')s
+
+            sentiment = request.form['sentiment']
+
+            better_caption = generate_gpt_caption(generated_caption, sentiment)  # Call your GPT-3 integration function
+
+
             flash('Image Caption Generated and Displayed Below!')
-            return render_template('home.html', filename=filename, generated_caption=generated_caption)
+            return render_template('home.html', filename=filename, better_caption=better_caption)
 
         else:
             flash('Allowed image types are - png, jpg, jpeg, gif')
 
     filename = request.args.get('filename', None)
-    generated_caption = None  # Initialize to None if no caption is generated
-    return render_template('home.html', filename=filename, generated_caption=generated_caption)
+    better_caption = None  # Initialize to None if no caption is generated
+    return render_template('home.html', filename=filename, better_caption=better_caption)
 
 # This handles the image upload
 def allowed_file(filename):

@@ -1,2 +1,2 @@
 username = "CapGenius007"
-password = "loyalistCapGenius"
+password = "myCapGenius"
