@@ -32,9 +32,9 @@
                     </select>
                 </div>
                 
-                <button type="submit" class="btn btn-info">Generate Caption</button>
+                <button type="submit" class="btn btn-info"><i class="fa fa-file-text-o"></i> <b>Generate Caption</b></button>
             </form>
-        <div id="result"></div>
+        <!-- <div id="result"></div> -->
     </form>
 </div>
 </br>
@@ -51,7 +51,7 @@
             <form action="{{ url_for('views.post_to_instagram_action') }}" method="post">
                 <input type="hidden" name="caption" value="{{ better_caption }}">
                 <input type="hidden" name="filename" value="{{ filename }}">
-                <button type="submit" class="btn btn-info"><b>Post</b></button>
+                <button type="submit" class="btn btn-info"><i class="fa fa-share"></i> <b>Post</b></button>
             </form>
     {% endif %} <!-- End of if statement -->
 </div>
