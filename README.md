@@ -39,4 +39,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## ScreenShots
 
 #### Home Page
-![Home Page](Homepage.PNG)
+![Home Page](Homepage.png)
