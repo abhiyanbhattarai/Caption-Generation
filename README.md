@@ -43,4 +43,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 #### Project Demo
 ![Demo](Demo.gif)
-![Demo1](Demo 1.png)
+
+![Demo1](Demo1.png)
