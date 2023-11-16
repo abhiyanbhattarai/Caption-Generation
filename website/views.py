@@ -19,17 +19,6 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 UPLOAD_FOLDER = 'website/static/uploads/'
 
 
-# def check_session_timeout():
-#     last_activity = session.get('last_activity')
-#     now = datetime.now(timezone.utc)
-#     session_timeout = timedelta(seconds=600)  # Set the session timeout to 10 minutes (adjust as needed)
-#     if last_activity is not None and now - last_activity > session_timeout:
-#         flash('Session timed out. Please log in again.', category='error')
-#         return redirect(url_for('auth.login'))
-
-
-# prompt_type = "Instagram Caption with hashtags:"
-
 # This route handles the home page of the website
 @views.route('/', methods=['GET', 'POST'])
 @login_required
