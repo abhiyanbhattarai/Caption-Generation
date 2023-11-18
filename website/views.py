@@ -45,6 +45,7 @@ def home():
         else:
             flash('Allowed image types are - png, jpg, jpeg, gif')
 
+    # If the request method is GET, then render the home page
     filename = request.args.get('filename', None)
     better_caption = None  # Initialize to None if no caption is generated
     return render_template('home.html', filename=filename, better_caption=better_caption)
@@ -68,6 +69,6 @@ def post_to_instagram_action():
 
     # Post the image to Instagram using the post_to_instagram function
     post_to_instagram(caption, file_path)
-
+`   # Display a success message
     flash('Image posted to Instagram successfully!', category='success')
     return redirect(url_for('views.home'))
