@@ -52,6 +52,13 @@
                 <input type="hidden" name="filename" value="{{ filename }}">
                 <button type="submit" class="btn btn-info"><i class="fa fa-share"></i> <b>Post</b></button>
             </form>
+        </br>
+                <!-- Add a new form for posting to Twitter -->
+            <form action="{{ url_for('views.post_to_twitter_action') }}" method="post">
+                <input type="hidden" name="caption" value="{{ better_caption }}">
+                <input type="hidden" name="filename" value="{{ filename }}">
+                <button type="submit" class="btn btn-info"><b>Post to Twitter</b></button>
+            </form>
     {% endif %} <!-- End of if statement -->
 </div>
 

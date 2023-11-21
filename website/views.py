@@ -9,6 +9,7 @@ from PIL import Image
 from prediction import generate_caption, model1, EncoderDecoder
 from instagram_posting import post_to_instagram
 from gpt_integration import generate_gpt_caption  
+from twitter_posting import tweet_post
 
 views = Blueprint('views', __name__)
 
@@ -71,4 +72,16 @@ def post_to_instagram_action():
     post_to_instagram(caption, file_path)
     # Display a success message
     flash('Image posted to Instagram successfully!', category='success')
+    return redirect(url_for('views.home'))
+
+@views.route('/post_to_twitter_action', methods=['POST'])
+def post_to_twitter_action():
+    caption = request.form.get('caption')
+    filename = request.form.get('filename')
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
+
+    # Post the image to Instagram using the tweet_post function
+    tweet_post(file_path, caption)
+
+    flash('Image posted to Twitter successfully!', category='success')
     return redirect(url_for('views.home'))
