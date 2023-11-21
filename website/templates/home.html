@@ -4,16 +4,15 @@
 <h1 align="center">Social Media Caption Generator</h1>
 </br>
 <div class="container mt-5">
-    <h3>Select an image to upload</h3>
     <form method="POST" enctype="multipart/form-data">
     </br>
         <div class="form-group">
-            <label for="file"><strong>Choose an image to upload:</strong></label>
-            <i class="fa fa-picture-o" aria-hidden="true"></i>
+            <label for="file"><h3>Select an image to upload: <i class="fa fa-picture-o" aria-hidden="true"></i></h3></strong></label>
+            
             </br>
             <input type="file" class="form-control" name="file" id="file" accept=".jpg, .jpeg, .png, .gif">
         </div>
-            <h3>Generate Caption</h3>
+            <h4>Generate Caption</h4>
             <form action="/generate_caption" method="post" class="mb-4">
                 <div class="mb-3">
                     <label for="sentiment" class="form-label">Select Sentiment:</label>
@@ -47,18 +46,22 @@
         <p id="editable-text" class="outlined-text">{{ better_caption }}</p>
             <button id="edit-button" class="btn btn-info"> <i class="fa fa-pencil" aria-hidden="true"></i> <b>Edit Text</b></button >
             <p id="edited-text"></p>
-            <form action="{{ url_for('views.post_to_instagram_action') }}" method="post">
-                <input type="hidden" name="caption" value="{{ better_caption }}">
-                <input type="hidden" name="filename" value="{{ filename }}">
-                <button type="submit" class="btn btn-info"><i class="fa fa-share"></i> <b>Post</b></button>
-            </form>
-        </br>
-                <!-- Add a new form for posting to Twitter -->
-            <form action="{{ url_for('views.post_to_twitter_action') }}" method="post">
-                <input type="hidden" name="caption" value="{{ better_caption }}">
-                <input type="hidden" name="filename" value="{{ filename }}">
-                <button type="submit" class="btn btn-info"><b>Post to Twitter</b></button>
-            </form>
+            <div class="row">
+                <div class="col-md-1">
+                    <form action="{{ url_for('views.post_to_instagram_action') }}" method="post">
+                        <input type="hidden" name="caption" value="{{ better_caption }}">
+                        <input type="hidden" name="filename" value="{{ filename }}">
+                        <button type="submit" class="btn btn-info"><i class="fa fa-instagram"></i> <b>Post</b></button>
+                    </form>
+                </div>
+                <div class="col-md-1">
+                    <form action="{{ url_for('views.post_to_twitter_action') }}" method="post">
+                        <input type="hidden" name="caption" value="{{ better_caption }}">
+                        <input type="hidden" name="filename" value="{{ filename }}">
+                        <button type="submit" class="btn btn-info"><i class="fa fa-twitter"></i> <b>Post</b></button>
+                    </form>
+                </div>
+            </div>
     {% endif %} <!-- End of if statement -->
 </div>
 
