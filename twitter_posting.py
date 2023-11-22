@@ -2,8 +2,6 @@
 import tweepy
 import os
 from dotenv import load_dotenv
-import tweepy
-import os
 
 def tweet_post(image_path, tweet_text):
     # Load environment variables from creds
