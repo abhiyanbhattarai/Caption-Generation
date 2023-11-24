@@ -9,8 +9,11 @@ import torchvision.models as models
 from torch.utils.data import DataLoader,Dataset
 import torchvision.transforms as T
 
-
-
+import pickle
+from data_loader import DataLoader
+import torch
+from torchvision import transforms
+from PIL import Image
 
 class EncoderCNN(nn.Module):
     def __init__(self):
@@ -175,17 +178,6 @@ class EncoderDecoder(nn.Module):
         features = self.encoder(images)
         outputs = self.decoder(features, captions)
         return outputs
-
-
-import pickle
-from data_loader import DataLoader
-
-
-
-import torch
-from torchvision import transforms
-from PIL import Image
-
 
 
 if not torch.backends.mps.is_available():
