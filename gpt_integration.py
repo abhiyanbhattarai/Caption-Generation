@@ -6,9 +6,6 @@ from openai import OpenAI
 with open('config.json', 'r') as config_file:
     config = json.load(config_file)
 
-# openai.api_key = config.get('openai_api_key')
-
-
 client = OpenAI(api_key=config.get('openai_api_key'))
 
 #  Function to generate a better caption using GPT-3
