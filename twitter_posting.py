@@ -21,7 +21,6 @@ def tweet_post(image_path, tweet_text):
     # Create API object
     api = tweepy.API(auth, wait_on_rate_limit=True)
 
-
     # Upload image
     media = api.media_upload(filename=image_path)
 

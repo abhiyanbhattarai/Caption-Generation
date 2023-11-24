@@ -11,7 +11,7 @@ with open('config.json', 'r') as config_file:
 
 client = OpenAI(api_key=config.get('openai_api_key'))
 
-
+#  Function to generate a better caption using GPT-3
 def generate_gpt_caption(generated_caption,sentiment):
 
     # Generate OpenAI API request
