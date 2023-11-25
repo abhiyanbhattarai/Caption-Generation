@@ -18,7 +18,6 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 # Image Upload Folder
 UPLOAD_FOLDER = 'website/static/uploads/'
 
-
 # This route handles the home page of the website
 @views.route('/', methods=['GET', 'POST'])
 @login_required
