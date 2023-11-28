@@ -12,7 +12,7 @@ client = OpenAI(api_key=config.get('openai_api_key'))
 def generate_gpt_caption(generated_caption,sentiment):
 
     # Generate OpenAI API request
-    system_message = f"You are generating a instagram caption with some words and hashtags, do not include the {sentiment} word in the caption. Generate maximum 2 hashtags and maximum 2 emojis."
+    system_message = f"Behave as if you are a marketing specialist for instagram, You are generating a instagram caption more than 15 words, include hashtags and emojis, do not include the {sentiment} word in the caption. Generate maximum 2 hashtags and maximum 2 emojiss"
     user_message = f"{sentiment} {generated_caption}"
 
     # Call OpenAI API
