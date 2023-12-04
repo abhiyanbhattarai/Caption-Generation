@@ -1,245 +1,413 @@
-
-import torch
+import os
+import re
 import numpy as np
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-
-import torchvision.models as models
-from torch.utils.data import DataLoader,Dataset
-import torchvision.transforms as T
-
 import pickle
-from data_loader import DataLoader
-import torch
-from torchvision import transforms
-from PIL import Image
 
-class EncoderCNN(nn.Module):
-    def __init__(self):
-        super(EncoderCNN, self).__init__()
-        resnet = models.resnet50(pretrained=True)
-        for param in resnet.parameters():
-            param.requires_grad_(False)
-        
-        modules = list(resnet.children())[:-2]
-        self.resnet = nn.Sequential(*modules)
-        
-    def forward(self, images):
-        features = self.resnet(images)                                    #(batch_size,2048,7,7)
-        features = features.permute(0, 2, 3, 1)                           #(batch_size,7,7,2048)
-        features = features.view(features.size(0), -1, features.size(-1)) #(batch_size,49,2048)
-        return features
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow.keras.applications import efficientnet
+# from tensorflow.keras.layers import TextVectorization
 
-#Bahdanau Attention
-class Attention(nn.Module):
-    def __init__(self, encoder_dim,decoder_dim,attention_dim):
-        super(Attention, self).__init__()
-        
-        self.attention_dim = attention_dim
-        
-        self.W = nn.Linear(decoder_dim,attention_dim)
-        self.U = nn.Linear(encoder_dim,attention_dim)
-        
-        self.A = nn.Linear(attention_dim,1)
-        
-    def forward(self, features, hidden_state):
-        u_hs = self.U(features)     #(batch_size,num_layers,attention_dim)
-        w_ah = self.W(hidden_state) #(batch_size,attention_dim)
-        
-        combined_states = torch.tanh(u_hs + w_ah.unsqueeze(1)) #(batch_size,num_layers,attemtion_dim)
-        
-        attention_scores = self.A(combined_states)         #(batch_size,num_layers,1)
-        attention_scores = attention_scores.squeeze(2)     #(batch_size,num_layers)
-        
-        
-        alpha = F.softmax(attention_scores,dim=1)          #(batch_size,num_layers)
-        
-        attention_weights = features * alpha.unsqueeze(2)  #(batch_size,num_layers,features_dim)
-        attention_weights = attention_weights.sum(dim=1)   #(batch_size,num_layers)
-        
-        return alpha,attention_weights
-        
-#Attention Decoder
-class DecoderRNN(nn.Module):
-    def __init__(self,embed_size, vocab_size, attention_dim,encoder_dim,decoder_dim,drop_prob=0.3):
-        super().__init__()
-        
-        #save the model param
-        self.vocab_size = vocab_size
-        self.attention_dim = attention_dim
-        self.decoder_dim = decoder_dim
-        
-        self.embedding = nn.Embedding(vocab_size,embed_size)
-        self.attention = Attention(encoder_dim,decoder_dim,attention_dim)
-        
-        
-        self.init_h = nn.Linear(encoder_dim, decoder_dim)  
-        self.init_c = nn.Linear(encoder_dim, decoder_dim)  
-        self.lstm_cell = nn.LSTMCell(embed_size+encoder_dim,decoder_dim,bias=True)
-        self.f_beta = nn.Linear(decoder_dim, encoder_dim)
-        
-        
-        self.fcn = nn.Linear(decoder_dim,vocab_size)
-        self.drop = nn.Dropout(drop_prob)
-        
-    def forward(self, features, captions):
-        
-        #vectorize the caption
-        embeds = self.embedding(captions)
-        
-        # Initialize LSTM state
-        h, c = self.init_hidden_state(features)  # (batch_size, decoder_dim)
-        
-        #get the seq length to iterate
-        seq_length = len(captions[0])-1 #Exclude the last one
-        batch_size = captions.size(0)
-        num_features = features.size(1)
-        
-        preds = torch.zeros(batch_size, seq_length, self.vocab_size).to(device)
-        alphas = torch.zeros(batch_size, seq_length,num_features).to(device)
-                
-        for s in range(seq_length):
-            alpha,context = self.attention(features, h)
-            lstm_input = torch.cat((embeds[:, s], context), dim=1)
-            h, c = self.lstm_cell(lstm_input, (h, c))
-                    
-            output = self.fcn(self.drop(h))
-            
-            preds[:,s] = output
-            alphas[:,s] = alpha  
-        
-        
-        return preds, alphas
-    
-    def generate_caption(self,features,max_len=20,vocab=None):
-        # Inference part
-        # Given the image features generate the captions
-        
-        batch_size = features.size(0)
-        h, c = self.init_hidden_state(features)  # (batch_size, decoder_dim)
-        
-        alphas = []
-        
-        #starting input
-        word = torch.tensor(vocab.stoi['<SOS>']).view(1,-1).to(device)
-        embeds = self.embedding(word)
+#Ignore the warnings
+import warnings
+warnings.filterwarnings("ignore")
 
-        captions = []
-        
-        for i in range(max_len):
-            alpha,context = self.attention(features, h)
-                        
-            #store the apla score
-            alphas.append(alpha.cpu().detach().numpy())
-            
-            lstm_input = torch.cat((embeds[:, 0], context), dim=1)
-            h, c = self.lstm_cell(lstm_input, (h, c))
-            output = self.fcn(self.drop(h))
-            output = output.view(batch_size,-1)
-        
-            #select the word with most val
-            predicted_word_idx = output.argmax(dim=1)
-            
-            #save the generated word
-            captions.append(predicted_word_idx.item())
-            
-            #end if <EOS detected>
-            if vocab.itos[predicted_word_idx.item()] == "<EOS>":
-                break
-            
-            #send generated word as the next caption
-            embeds = self.embedding(predicted_word_idx.unsqueeze(0))
-        
-        #covert the vocab idx to words and return sentence
-        return [vocab.itos[idx] for idx in captions],alphas
-    
-    def init_hidden_state(self, encoder_out):
-        mean_encoder_out = encoder_out.mean(dim=1)
-        h = self.init_h(mean_encoder_out)  # (batch_size, decoder_dim)
-        c = self.init_c(mean_encoder_out)
-        return h, c
+seed = 111
+np.random.seed(seed)
+tf.random.set_seed(seed)
+
+# print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+# tf.test.is_built_with_cuda()
+# tf.test.gpu_device_name()
+
+"""------------------------------------------------------------"""
+checkpoint_path = str("model_save/"+"model_10_30K.ckpt")
+vocab_path = "model_save/vocab_model_10_30K.pkl"
 
 
-class EncoderDecoder(nn.Module):
-    def __init__(self,embed_size, vocab_size, attention_dim,encoder_dim,decoder_dim,drop_prob=0.3):
-        super().__init__()
-        self.encoder = EncoderCNN()
-        self.decoder = DecoderRNN(
-            embed_size=embed_size,
-            vocab_size = vocab_size,
-#             vocab_size = len(dataset.vocab),
-            attention_dim=attention_dim,
-            encoder_dim=encoder_dim,
-            decoder_dim=decoder_dim
-        )
-        
-    def forward(self, images, captions):
-        features = self.encoder(images)
-        outputs = self.decoder(features, captions)
-        return outputs
+enc_num_heads=1
+dec_num_heads=2
+
+# Desired image dimensions
+IMAGE_SIZE = (299, 299)
+
+# Vocabulary size
+VOCAB_SIZE = 50000
+
+# Fixed length allowed for any sequence
+SEQ_LENGTH = 50
+
+# Dimension for the image embeddings and token embeddings
+EMBED_DIM = 1024
+
+# Per-layer units in the feed-forward network
+FF_DIM = 1048
+
+# Other training parameters
+BATCH_SIZE = 16
+EPOCHS = 30
+AUTOTUNE = tf.data.AUTOTUNE
+"""------------------------------------------------------------"""
 
 
-if not torch.backends.mps.is_available():
-    print('MPS not available')
 
-device= torch.device('mps')
+"""-----------------CREATING MODEL BUILDING BLOCKS-------------"""
 
-# Define the path to the saved model state file
-model_state_path = 'cap_gen_50_epochs_model_state_full.pth'
+image_augmentation = keras.Sequential(
+    [
+        layers.RandomFlip("horizontal"),
+        layers.RandomRotation(0.2),
+        layers.RandomContrast(0.3),
+    ]
+)
 
-# Load the saved model state
-checkpoint = torch.load(model_state_path,map_location=torch.device('cpu'))
+def decode_and_resize(img_path):
+    img = tf.io.read_file(img_path)
+    img = tf.image.decode_jpeg(img, channels=3)
+    img = tf.image.resize(img, IMAGE_SIZE)
+    img = tf.image.convert_image_dtype(img, tf.float32)
+    return img
 
-# Create the model architecture (Encoder-Decoder)
-# from model import EncoderDecoder
 
-def model1():
-    model = EncoderDecoder(
-        embed_size=checkpoint['embed_size'],
-        vocab_size=checkpoint['vocab_size'],
-        attention_dim=checkpoint['attention_dim'],
-        encoder_dim=checkpoint['encoder_dim'],
-        decoder_dim=checkpoint['decoder_dim']
+
+def get_cnn_model():
+    base_model = efficientnet.EfficientNetB0(
+        input_shape=(*IMAGE_SIZE, 3), include_top=False, weights="imagenet",
     )
-    return model
+    # We freeze our feature extractor
+    base_model.trainable = False
+    base_model_out = base_model.output
+    base_model_out = layers.Reshape((-1, base_model_out.shape[-1]))(base_model_out)
+    cnn_model = keras.models.Model(base_model.input, base_model_out)
+    return cnn_model
 
 
-# Function to generate a caption for an input image
-def generate_caption(image_path,model):
-    # Define the transformations for input images
-    transform = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
-    ])
+class TransformerEncoderBlock(layers.Layer):
+    def __init__(self, embed_dim, dense_dim, num_heads, **kwargs):
+        super().__init__(**kwargs)
+        self.embed_dim = embed_dim
+        self.dense_dim = dense_dim
+        self.num_heads = num_heads
+        self.attention_1 = layers.MultiHeadAttention(
+            num_heads=num_heads, key_dim=embed_dim, dropout=0.0
+        )
+        self.layernorm_1 = layers.LayerNormalization()
+        self.layernorm_2 = layers.LayerNormalization()
+        self.dense_1 = layers.Dense(embed_dim, activation="relu")
 
-    image = Image.open(image_path).convert("RGB")
-    image = transform(image).unsqueeze(0)  # Add the unsqueeze here to create a batch dimension
+    def call(self, inputs, training, mask=None):
+        inputs = self.layernorm_1(inputs)
+        inputs = self.dense_1(inputs)
+
+        attention_output_1 = self.attention_1(
+            query=inputs,
+            value=inputs,
+            key=inputs,
+            attention_mask=None,
+            training=training,
+        )
+        out_1 = self.layernorm_2(inputs + attention_output_1)
+        return out_1
+
+
+class PositionalEmbedding(layers.Layer):
+    def __init__(self, sequence_length, vocab_size, embed_dim, **kwargs):
+        super().__init__(**kwargs)
+        self.token_embeddings = layers.Embedding(
+            input_dim=vocab_size, output_dim=embed_dim
+        )
+        self.position_embeddings = layers.Embedding(
+            input_dim=sequence_length, output_dim=embed_dim
+        )
+        self.sequence_length = sequence_length
+        self.vocab_size = vocab_size
+        self.embed_dim = embed_dim
+        self.embed_scale = tf.math.sqrt(tf.cast(embed_dim, tf.float32))
+
+    def call(self, inputs):
+        length = tf.shape(inputs)[-1]
+        positions = tf.range(start=0, limit=length, delta=1)
+        embedded_tokens = self.token_embeddings(inputs)
+        embedded_tokens = embedded_tokens * self.embed_scale
+        embedded_positions = self.position_embeddings(positions)
+        return embedded_tokens + embedded_positions
+
+    def compute_mask(self, inputs, mask=None):
+        return tf.math.not_equal(inputs, 0)
+
+
+class TransformerDecoderBlock(layers.Layer):
+    def __init__(self, embed_dim, ff_dim, num_heads, **kwargs):
+        super().__init__(**kwargs)
+        self.embed_dim = embed_dim
+        self.ff_dim = ff_dim
+        self.num_heads = num_heads
+        self.attention_1 = layers.MultiHeadAttention(
+            num_heads=num_heads, key_dim=embed_dim, dropout=0.1
+        )
+        self.attention_2 = layers.MultiHeadAttention(
+            num_heads=num_heads, key_dim=embed_dim, dropout=0.1
+        )
+        self.ffn_layer_1 = layers.Dense(ff_dim, activation="relu")
+        self.ffn_layer_2 = layers.Dense(embed_dim)
+
+        self.layernorm_1 = layers.LayerNormalization()
+        self.layernorm_2 = layers.LayerNormalization()
+        self.layernorm_3 = layers.LayerNormalization()
+
+        self.embedding = PositionalEmbedding(
+            embed_dim=EMBED_DIM, sequence_length=SEQ_LENGTH, vocab_size=VOCAB_SIZE
+        )
+        self.out = layers.Dense(VOCAB_SIZE, activation="softmax")
+
+        self.dropout_1 = layers.Dropout(0.3)
+        self.dropout_2 = layers.Dropout(0.5)
+        self.supports_masking = True
+
+    def call(self, inputs, encoder_outputs, training, mask=None):
+        inputs = self.embedding(inputs)
+        causal_mask = self.get_causal_attention_mask(inputs)
+
+        if mask is not None:
+            padding_mask = tf.cast(mask[:, :, tf.newaxis], dtype=tf.int32)
+            combined_mask = tf.cast(mask[:, tf.newaxis, :], dtype=tf.int32)
+            combined_mask = tf.minimum(combined_mask, causal_mask)
+
+        attention_output_1 = self.attention_1(
+            query=inputs,
+            value=inputs,
+            key=inputs,
+            attention_mask=combined_mask,
+            training=training,
+        )
+        out_1 = self.layernorm_1(inputs + attention_output_1)
+
+        attention_output_2 = self.attention_2(
+            query=out_1,
+            value=encoder_outputs,
+            key=encoder_outputs,
+            attention_mask=padding_mask,
+            training=training,
+        )
+        out_2 = self.layernorm_2(out_1 + attention_output_2)
+
+        ffn_out = self.ffn_layer_1(out_2)
+        ffn_out = self.dropout_1(ffn_out, training=training)
+        ffn_out = self.ffn_layer_2(ffn_out)
+
+        ffn_out = self.layernorm_3(ffn_out + out_2, training=training)
+        ffn_out = self.dropout_2(ffn_out, training=training)
+        preds = self.out(ffn_out)
+        return preds
+
+    def get_causal_attention_mask(self, inputs):
+        input_shape = tf.shape(inputs)
+        batch_size, sequence_length = input_shape[0], input_shape[1]
+        i = tf.range(sequence_length)[:, tf.newaxis]
+        j = tf.range(sequence_length)
+        mask = tf.cast(i >= j, dtype="int32")
+        mask = tf.reshape(mask, (1, input_shape[1], input_shape[1]))
+        mult = tf.concat(
+            [tf.expand_dims(batch_size, -1), tf.constant([1, 1], dtype=tf.int32)],
+            axis=0,
+        )
+        return tf.tile(mask, mult)
+
+
+class ImageCaptioningModel(keras.Model):
+    def __init__(
+        self, cnn_model, encoder, decoder, num_captions_per_image=5, image_aug=None,
+    ):
+        super().__init__()
+        self.cnn_model = cnn_model
+        self.encoder = encoder
+        self.decoder = decoder
+        self.loss_tracker = keras.metrics.Mean(name="loss")
+        self.acc_tracker = keras.metrics.Mean(name="accuracy")
+        self.num_captions_per_image = num_captions_per_image
+        self.image_aug = image_aug
+
+    def calculate_loss(self, y_true, y_pred, mask):
+        loss = self.loss(y_true, y_pred)
+        mask = tf.cast(mask, dtype=loss.dtype)
+        loss *= mask
+        return tf.reduce_sum(loss) / tf.reduce_sum(mask)
+
+    def calculate_accuracy(self, y_true, y_pred, mask):
+        accuracy = tf.equal(y_true, tf.argmax(y_pred, axis=2))
+        accuracy = tf.math.logical_and(mask, accuracy)
+        accuracy = tf.cast(accuracy, dtype=tf.float32)
+        mask = tf.cast(mask, dtype=tf.float32)
+        return tf.reduce_sum(accuracy) / tf.reduce_sum(mask)
+
+    def _compute_caption_loss_and_acc(self, img_embed, batch_seq, training=True):
+        encoder_out = self.encoder(img_embed, training=training)
+        batch_seq_inp = batch_seq[:, :-1]
+        batch_seq_true = batch_seq[:, 1:]
+        mask = tf.math.not_equal(batch_seq_true, 0)
+        batch_seq_pred = self.decoder(
+            batch_seq_inp, encoder_out, training=training, mask=mask
+        )
+        loss = self.calculate_loss(batch_seq_true, batch_seq_pred, mask)
+        acc = self.calculate_accuracy(batch_seq_true, batch_seq_pred, mask)
+        return loss, acc
+
+    def train_step(self, batch_data):
+        batch_img, batch_seq = batch_data
+        batch_loss = 0
+        batch_acc = 0
+
+        if self.image_aug:
+            batch_img = self.image_aug(batch_img)
+
+        # 1. Get image embeddings
+        img_embed = self.cnn_model(batch_img)
+
+        # 2. Pass each of the five captions one by one to the decoder
+        # along with the encoder outputs and compute the loss as well as accuracy
+        # for each caption.
+        for i in range(self.num_captions_per_image):
+            with tf.GradientTape() as tape:
+                loss, acc = self._compute_caption_loss_and_acc(
+                    img_embed, batch_seq[:, i, :], training=True
+                )
+
+                # 3. Update loss and accuracy
+                batch_loss += loss
+                batch_acc += acc
+
+            # 4. Get the list of all the trainable weights
+            train_vars = (
+                self.encoder.trainable_variables + self.decoder.trainable_variables
+            )
+
+            # 5. Get the gradients
+            grads = tape.gradient(loss, train_vars)
+
+            # 6. Update the trainable weights
+            self.optimizer.apply_gradients(zip(grads, train_vars))
+
+        # 7. Update the trackers
+        batch_acc /= float(self.num_captions_per_image)
+        self.loss_tracker.update_state(batch_loss)
+        self.acc_tracker.update_state(batch_acc)
+
+        # 8. Return the loss and accuracy values
+        return {"loss": self.loss_tracker.result(), "acc": self.acc_tracker.result()}
+
+    def test_step(self, batch_data):
+        batch_img, batch_seq = batch_data
+        batch_loss = 0
+        batch_acc = 0
+
+        # 1. Get image embeddings
+        img_embed = self.cnn_model(batch_img)
+
+        # 2. Pass each of the five captions one by one to the decoder
+        # along with the encoder outputs and compute the loss as well as accuracy
+        # for each caption.
+        for i in range(self.num_captions_per_image):
+            loss, acc = self._compute_caption_loss_and_acc(
+                img_embed, batch_seq[:, i, :], training=False
+            )
+
+            # 3. Update batch loss and batch accuracy
+            batch_loss += loss
+            batch_acc += acc
+
+        batch_acc /= float(self.num_captions_per_image)
+
+        # 4. Update the trackers
+        self.loss_tracker.update_state(batch_loss)
+        self.acc_tracker.update_state(batch_acc)
+
+        # 5. Return the loss and accuracy values
+        return {"loss": self.loss_tracker.result(), "acc": self.acc_tracker.result()}
+
+    @property
+    def metrics(self):
+        # We need to list our metrics here so the `reset_states()` can be
+        # called automatically.
+        return [self.loss_tracker, self.acc_tracker]
+
+
+cnn_model = get_cnn_model()
+encoder = TransformerEncoderBlock(embed_dim=EMBED_DIM, dense_dim=FF_DIM, num_heads=enc_num_heads)
+decoder = TransformerDecoderBlock(embed_dim=EMBED_DIM, ff_dim=FF_DIM, num_heads=dec_num_heads)
+
+
+
+
+"""-----------------CREATING ARQ AND IMPORTING TRAINED WEIGHTS-------------"""
+
+
+
+caption_model = ImageCaptioningModel(
+    cnn_model=cnn_model, encoder=encoder, decoder=decoder, image_aug=image_augmentation,
+)
+caption_model.load_weights(checkpoint_path)
+
+
+
+
+"""-----------------IMPORT VOCAB-------------"""
+
+with open(vocab_path, 'rb') as f:
+    vocab = pickle.load(f)
     
-    vocab_path = 'vocab_cap_gen_50_epochs_model_state_full.pkl'
-    with open(vocab_path, 'rb') as f:
-        vocab = pickle.load(f)
+    
+    
+# vocab = vectorization.get_vocabulary()
+index_lookup = dict(zip(range(len(vocab)), vocab))
+max_decoded_sentence_length = SEQ_LENGTH - 1
+# valid_images = list(valid_data.keys())
+
+# Create a mapping from word to index
+word_to_index = dict(zip(vocab, range(len(vocab))))
+
+# Reverse mapping from index to word
+index_to_word = dict(zip(range(len(vocab)), vocab))
+
+
+def generate_caption(image_path):
+    # Select a random image from the validation dataset
+    # sample_img = np.random.choice(valid_images)
+    
+
+    # Read the image from the disk
+    sample_img = decode_and_resize(image_path)
+    img = sample_img.numpy().clip(0, 255).astype(np.uint8)
+
+
+    # Pass the image to the CNN
+    img = tf.expand_dims(sample_img, 0)
+    img = caption_model.cnn_model(img)
+
+    # Pass the image features to the Transformer encoder
+    encoded_img = caption_model.encoder(img, training=False)
+
+    # Generate the caption using the Transformer decoder
+    decoded_caption = "<start> "
+    for i in range(max_decoded_sentence_length):
+        # tokenized_caption = tokenizer([decoded_caption])[:, :-1]
         
-    model = model1()
-    model.to(device)
-    model.load_state_dict(checkpoint['state_dict'])
-    model.eval()
+        tokenized_caption = tf.expand_dims([word_to_index[i] for i in decoded_caption.split()], 0) 
+                
+        
+        
+        mask = tf.math.not_equal(tokenized_caption, 0)
+        predictions = caption_model.decoder(
+            tokenized_caption, encoded_img, training=False, mask=mask
+        )
+        sampled_token_index = np.argmax(predictions[0, i, :])
+        sampled_token = index_lookup[sampled_token_index]
+        if sampled_token == "<end>":
+            break
+        decoded_caption += " " + sampled_token
+
+    decoded_caption = decoded_caption.replace("<start> ", "")
+    decoded_caption = decoded_caption.replace(" <end>", "").strip()
     
-    with torch.no_grad():
-        features = model.encoder(image.to(device))
-        caps, _ = model.decoder.generate_caption(features, vocab=vocab)
-        caption = ' '.join(caps)
+    return decoded_caption
     
-    return caption
-
-
-
-
-
-
-
-
-
-

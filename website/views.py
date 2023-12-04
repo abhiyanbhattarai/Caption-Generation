@@ -6,7 +6,7 @@ from . import db
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-from prediction import generate_caption, model1, EncoderDecoder
+from prediction import generate_caption
 from instagram_posting import post_to_instagram
 from gpt_integration import generate_gpt_caption  
 from twitter_posting import tweet_post
@@ -30,7 +30,7 @@ def home():
             file.save(file_path)
 
             # Generate the image caption
-            generated_caption = generate_caption(file_path,model1())
+            generated_caption = generate_caption(file_path)
             
             # Get the sentiment from the form
             sentiment = request.form['sentiment']
