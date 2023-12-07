@@ -17,10 +17,6 @@ seed = 111
 np.random.seed(seed)
 tf.random.set_seed(seed)
 
-# print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-# tf.test.is_built_with_cuda()
-# tf.test.gpu_device_name()
-
 """------------------------------------------------------------"""
 checkpoint_path = str("model_save/"+"model_10_30K.ckpt")
 vocab_path = "model_save/vocab_model_10_30K.pkl"
