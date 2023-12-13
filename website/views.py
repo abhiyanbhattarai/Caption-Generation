@@ -82,6 +82,6 @@ def post_to_twitter_action():
 
     # Post the image to Instagram using the tweet_post function
     tweet_post(file_path, caption)
-
+    # Display a success message
     flash('Image posted to Twitter successfully!', category='success')
     return redirect(url_for('views.home'))
