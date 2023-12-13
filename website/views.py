@@ -73,6 +73,7 @@ def post_to_instagram_action():
     flash('Image posted to Instagram successfully!', category='success')
     return redirect(url_for('views.home'))
 
+#this route handles the twitter post action
 @views.route('/post_to_twitter_action', methods=['POST'])
 def post_to_twitter_action():
     caption = request.form.get('caption')
