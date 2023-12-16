@@ -7,8 +7,10 @@ from pathlib import Path
 def post_to_instagram(caption,image_path):
     cl = Client()
     cl.login(config.username, config.password)
+    # Getting creditentials 
     user = cl.user_info_by_username("CapGenius")
 
+    # Path to image
     image_path  = Path(image_path)
 
     media = cl.photo_upload(
