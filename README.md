@@ -48,4 +48,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## References
 
-1. Keras. [Image Captioning Example](https://keras.io/examples/vision/image_captioning/)
+1. Keras [Image Captioning Example](https://keras.io/examples/vision/image_captioning/)
