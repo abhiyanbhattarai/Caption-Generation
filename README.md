@@ -57,6 +57,12 @@ venv_name\Scripts\activate  # Activate the virtual environment (for Windows)
  **User Shares on Social Media:**
    - Users receive the enhanced image description and can choose to post the image along with the caption, hashtags, and emoticons to social media platforms like Instagram or Twitter.
 
+### 6. Docker Integration
+
+ **Dockerized Project:**
+   - The project has been Dockerized for easy deployment.
+
+
 ![Working](Working.jpeg)
 
 ## License
