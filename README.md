@@ -62,7 +62,6 @@ venv_name\Scripts\activate  # Activate the virtual environment (for Windows)
  **Dockerized Project:**
    - The project has been Dockerized for easy deployment.
 
-
 ![Working](Working.jpeg)
 
 ## License
@@ -83,3 +82,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## References
 
 1. Keras [Image Captioning Example](https://keras.io/examples/vision/image_captioning/)
+
+2. Kaggel Dataset [Flickr Image Dataset](https://www.kaggle.com/datasets/hsankesara/flickr-image-dataset)
