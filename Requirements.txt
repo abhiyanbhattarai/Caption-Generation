@@ -12,3 +12,4 @@ instagrapi
 spacy
 openai
 tweepy
+python-dotenv
