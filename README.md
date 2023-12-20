@@ -19,13 +19,8 @@ venv_name\Scripts\activate  # Activate the virtual environment (for Windows)
     ```bash 
     pip install -r Requirements.txt
     ```
-2. Download Spacy Data Model.
 
-      ```bash
-      python -m spacy download en
-      ```
-
-3. Run the app.
+2. Run the app.
 
       ```bash
       python main.py
