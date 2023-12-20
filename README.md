@@ -26,6 +26,39 @@ venv_name\Scripts\activate  # Activate the virtual environment (for Windows)
       python main.py
       ```
 
+## How it Works
+
+### 1. User Interaction
+
+ **User Uploads Image and Selects Sentiment:**
+   - Users interact with the project by uploading an image.
+   - They also select a sentiment that reflects the desired tone for the image caption.
+
+### 2. User Interface
+
+ **Flask Handles User Input:**
+   - The project's user interface is built using Flask.
+   - Flask processes the user's input, including the uploaded image and selected sentiment.
+
+### 3. Image Description Generation
+
+ **Keras:**
+   - The project utilizes Keras to generate a textual description of the uploaded image.
+   - This involves the use of a Convolutional Neural Network (CNN) and a Transformer model to extract meaningful information.
+
+### 4. GPT API Integration
+
+ **GPT API for Caption Enhancement:**
+   - The generated image description is sent to a GPT (Generative Pre-trained Transformer) API.
+   - The GPT API enhances the description, providing appealing captions, hashtags, and emoticons.
+
+### 5. Social Media Posting
+
+ **User Shares on Social Media:**
+   - Users receive the enhanced image description and can choose to post the image along with the caption, hashtags, and emoticons to social media platforms like Instagram or Twitter.
+
+![Working](Working.jpeg)
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
