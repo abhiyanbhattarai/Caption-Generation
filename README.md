@@ -3,29 +3,6 @@
 - Users can edit the generated caption and post that image and caption to social media(IG).
 - It utilizes a pre-trained deep learning model for image captioning and a Flask-based user interface to make it accessible through a web browser.
 
-## How To Run?
-
-- First, make sure to create and activate a virtual environment:
-
-```bash
-python -m venv venv_name  # Create a virtual environment
-
-source venv_name/bin/activate  # Activate the virtual environment (for macOS/Linux)
-      
-venv_name\Scripts\activate  # Activate the virtual environment (for Windows) 
-```
-1. Install Requirements.txt
-
-    ```bash 
-    pip install -r Requirements.txt
-    ```
-
-2. Run the app.
-
-      ```bash
-      python main.py
-      ```
-
 ## How it Works
 
 ### 1. User Interaction
@@ -64,10 +41,36 @@ venv_name\Scripts\activate  # Activate the virtual environment (for Windows)
 
 ![Working](Working.jpeg)
 
+## Project Portfolio
+
+Check out my [Wix Project Portfolio](https://sdntbhardwaj.wixsite.com/cap-genius) to explore more of my projects and achievements.
+
+## How To Run?
+
+- First, make sure to create and activate a virtual environment:
+
+```bash
+python -m venv venv_name  # Create a virtual environment
+
+source venv_name/bin/activate  # Activate the virtual environment (for macOS/Linux)
+      
+venv_name\Scripts\activate  # Activate the virtual environment (for Windows) 
+```
+1. Install Requirements.txt
+
+    ```bash 
+    pip install -r Requirements.txt
+    ```
+
+2. Run the app.
+
+      ```bash
+      python main.py
+      ```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 
 ## ScreenShots
 
