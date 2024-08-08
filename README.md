@@ -41,9 +41,6 @@
 
 ![Working](Working.jpeg)
 
-## Project Portfolio
-
-Check out our [Wix Project Portfolio](https://sdntbhardwaj.wixsite.com/cap-genius) to explore our team and working.
 
 ## How To Run?
 
